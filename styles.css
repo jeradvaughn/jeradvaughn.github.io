@@ -1,0 +1,48 @@
+body {
+  background-color: #0f1117;
+  color: #ffffff;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  text-align: center;
+}
+
+.card {
+  background: #181c24;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+  display: inline-block;
+}
+
+.profile-pic {
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+}
+
+h1 {
+  margin: 10px 0 5px;
+}
+
+.location {
+  color: #aaa;
+  margin-bottom: 15px;
+}
+
+.socials a {
+  margin: 0 10px;
+  color: #ccc;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.socials a:hover {
+  color: #ffffff;
+}
