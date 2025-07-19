@@ -1,0 +1,10 @@
+.btn{
+  margin-top: 3rem;
+  padding: 10px 30px;
+  background-color: lightsalmon;
+  border: none;
+  border-radius: 2px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+}
