@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About Me — Your Name</title>
+  <meta name="description" content="Single-file About Me page you can customize and share." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0b1020;
+      --bg-soft: #111634;
+      --card: #141a3a;
+      --text: #e6e8f5;
+      --muted: #a6add3;
+      --brand: #7c9cff;
+      --brand-2: #8ef0ff;
+      --ring: #7c9cff55;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --gap: clamp(14px, 2vw, 22px);
+    }
+    @media (prefers-coor-scheme: light){
+      :root{
+        --bg:#f6f7fb; --bg-soft:#edf0fb; --card:#ffffff; --text:#171a29; --muted:#5b627e;
+        --brand:#2b5cff; --brand-2:#00bfe5; --ring:#2b5cff44; --shadow:0 8px 22px rgba(20,27,60,.12);
+      }
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      color:var(--text); background:radial-gradient(90rem 90rem at -30% -20%, #1a225a33, transparent 60%),
+                           radial-gradient(70rem 70rem at 120% -10%, #00bfe522, transparent 60%),
+                           var(--bg);
+      line-height:1.55; letter-spacing:.01em;
+    }
+    a{color:inherit; text-decoration:none}
+    .container{max-width:1100px; margin:0 auto; padding: clamp(18px, 3vw, 36px)}
+
+    .hero{display:grid; grid-template-columns:1.2fr .8fr; gap: clamp(16px, 3vw, 28px); align-items:center; padding-block: clamp(28px, 5vw, 72px)}
+    .portrait{aspect-ratio:1; border-radius:50%; background:#ccc; display:grid; place-items:center; font-weight:700; font-size: clamp(28px, 4vw, 40px);}
+
+    footer{margin-top:60px; padding:24px 0; color:var(--muted); font-size:14px; border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent)}
+    .inline{display:flex; gap:10px; flex-wrap:wrap}
+
+    @media (max-width: 860px){
+      .hero{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero" id="home">
+      <div>
+        <h1>Jerad Vaughn - Facility Manager</h1>
+        <p>Hi everyone, I'm Jerad Vaughn, and I'll be joining the team as a new Facility Manager. Working for Google is a long-term aspiration realized and I couldn't be more excited. I'm looking forward to getting to know you all and working together.</p>
+        <section id="about">
+          <h2>About Me</h2>
+          <p>I have [Number] years of experience in [Your Field/Industry]. Prior to joining [Company Name], I worked at [Previous Company] where I [Briefly describe relevant experience or skills]. I'm passionate about [Relevant skills or interests] and I'm eager to contribute to [Specific team goals or projects].</p>
+          <p>Outside of work, I enjoy [Hobby/Interest].</p>
+          <p>I'm looking forward to collaborating with you all and learning from your expertise. Please don't hesitate to reach out if you have any questions or just want to chat!</p>
+        </section>
+      </div>
+      <div class="portrait" aria-label="Profile image placeholder">🙂</div>
+    </section>
+
+    <section id="contact">
+      <h2>Contact / Socials</h2>
+      <p class="inline">
+        <a class="button ghost" href="https://www.linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+        <a class="button ghost" href="https://www.facebook.com/yourprofile" target="_blank">Facebook</a>
+        <a class="button ghost" href="mailto:you@example.com" target="_blank">Email</a>
+      </p>
+    </section>
+
+    <footer>
+      <div class="container" style="padding:0">
+        © <span id="year"></span> [Your Name]. All rights reserved.
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
