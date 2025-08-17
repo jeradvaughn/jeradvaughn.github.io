@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About Me — Jerad Vaughn</title>
+  <meta name="description" content="Single-file About Me page you can customize and share." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Product+Sans&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #ffffff;
+      --bg-soft: #f1f3f4;
+      --card: #ffffff;
+      --text: #202124;
+      --muted: #5f6368;
+      --accent: #1a73e8;
+      --shadow: 0 1px 3px rgba(60,64,67,.3), 0 4px 8px rgba(60,64,67,.15);
+      --radius: 12px;
+      --gap: clamp(14px, 2vw, 22px);
+
+      --google-blue: #4285F4;
+      --google-red: #DB4437;
+      --google-yellow: #F4B400;
+      --google-green: #0F9D58;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:'Product Sans', Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+      color:var(--text); background:var(--bg); line-height:1.55; letter-spacing:.01em;
+    }
+    a{color:var(--accent); text-decoration:none}
+    /* widen page while keeping nice readable measure */
+    .container{max-width:1280px; margin:0 auto; padding: clamp(20px, 5vw, 48px)}
+
+    .hero{display:grid; grid-template-columns:1.1fr .6fr; gap: clamp(24px, 4vw, 48px); align-items:start; padding-block: clamp(32px, 5vw, 80px)}
+    .hero h1{font-family:'Product Sans', sans-serif; font-size: clamp(36px, 6vw, 64px); font-weight:700; margin-bottom:16px;}
+    /* Google logo style coloring for each letter */
+    .hero h1 span:nth-child(1){color:var(--google-blue)}
+    .hero h1 span:nth-child(2){color:var(--google-red)}
+    .hero h1 span:nth-child(3){color:var(--google-yellow)}
+    .hero h1 span:nth-child(4){color:var(--google-blue)}
+    .hero h1 span:nth-child(5){color:var(--google-green)}
+    .hero h1 span:nth-child(6){color:var(--google-red)}
+    .hero h1 span:nth-child(7){color:var(--google-yellow)}
+    .hero h1 span:nth-child(8){color:var(--google-blue)}
+    .hero h1 span:nth-child(9){color:var(--google-green)}
+    .hero h1 span:nth-child(10){color:var(--google-red)}
+    .hero h1 span:nth-child(11){color:var(--google-blue)}
+
+    .hero p{font-size:1.1rem; color:var(--text); margin-bottom:24px;}
+    section h2{margin-top:32px; font-size:1.8rem; color:var(--text)}
+    section p{margin-bottom:16px; color:var(--text)}
+
+    /* Portrait that stays on top/visible */
+    .portrait-wrap{position:sticky; top:16px; align-self:start}
+    .portrait{aspect-ratio:1; border-radius:50%; object-fit:cover; width:220px; height:220px; box-shadow:var(--shadow);}
+
+    .collage{display:grid; gap:var(--gap); margin-top:20px;}
+    .collage.two{grid-template-columns:repeat(2,1fr)}
+    .collage.four{grid-template-columns:repeat(2,1fr)}
+    .collage img{width:100%; border-radius:var(--radius); box-shadow:var(--shadow); object-fit:cover}
+
+    section#contact h2{margin-top:40px; font-size:1.6rem; color:var(--text);}
+    .inline{display:flex; gap:12px; flex-wrap:wrap; margin-top:16px}
+    .inline a{padding:8px 16px; border-radius:var(--radius); background:var(--bg-soft); box-shadow:var(--shadow); transition:background .3s, transform .2s;}
+    .inline a:hover{background:var(--accent); color:white; transform:translateY(-2px);}
+
+    footer{margin-top:60px; padding:24px 0; color:var(--muted); font-size:14px; text-align:center; border-top:1px solid #dadce0;}
+
+    /* Mobile tweaks: portrait appears first (on top), sticky disabled for simplicity */
+    @media (max-width: 860px){
+      .hero{grid-template-columns:1fr; text-align:center}
+      .portrait-wrap{order:-1; position:static; margin-bottom:16px}
+      .hero p{font-size:1rem}
+      .inline{justify-content:center}
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero" id="home">
+      <div>
+        <h1>
+          <span>J</span><span>e</span><span>r</span><span>a</span><span>d</span> <span>V</span><span>a</span><span>u</span><span>g</span><span>h</span><span>n</span>
+        </h1>
+        <p>Hi everyone, I'm Jerad Vaughn, and I'll be joining the team as a new Facility Manager. Working for Google is a long-term aspiration realized and I couldn't be more excited. I'm looking forward to getting to know you all and working together.</p>
+	
+	  <section id="about">
+          <h2>About Me</h2>
+          <p>I'll be joining Google with 17 years of diverse experience. I began my career in 2008 as an IT contractor and small business owner/operator, eventually expanding into OT and Process Control. After over a decade of learning and growing in that space, I made the jump into industry in 2019. Since then I've been focused on leading maintenance teams in the manufacturing sector. Prior to joining Google, I was the Maintenance and Reliability Leader at Georgia Pacific in Muskogee. I'm passionate about people and leveraging technology to improve the way we live and work.</p>
+	<p>I am married to my wife Autumn, we have a 7 month old son name Jett and a goldendoodle named Behr. I enjoy off-roading in the Rockies and amateur photography</p>          
+
+          <!-- Collage of family photos -->
+          <div class="collage two">
+            <img src="images/IMG_0001.png" alt="Family photo 1">
+            <img src="images/IMG_0002.png" alt="Family photo 2">
+          </div>
+
+          <!-- Collage of hobby photos -->
+          <div class="collage four">
+            <img src="images/IMG_0003.png" alt="Hobby photo 1">
+            <img src="images/IMG_0004.jpg" alt="Hobby photo 2">
+            <img src="images/IMG_0005.jpg" alt="Hobby placeholder 1">
+            <img src="images/IMG_0006.jpg" alt="Hobby placeholder 2">
+          </div>
+
+          <p>I'm looking forward to collaborating with you all and learning from your expertise. Please don't hesitate to reach out if you have any questions or just want to chat!</p>
+        </section>
+      </div>
+      <div class="portrait-wrap">
+        <img class="portrait" src="images/SQ_HS.png" alt="Profile picture of Jerad Vaughn">
+      </div>
+    </section>
+
+    <section id="contact">
+      <h2>Contact / Socials</h2>
+      <p class="inline">
+        <a class="button ghost" href="https://www.linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
+        <a class="button ghost" href="https://www.facebook.com/yourprofile" target="_blank">Facebook</a>
+        <a class="button ghost" href="mailto:you@example.com" target="_blank">Email</a>
+      </p>
+    </section>
+
+    <footer>
+      <div class="container" style="padding:0">
+        © <span id="year"></span> Jerad Vaughn. All rights reserved.
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
