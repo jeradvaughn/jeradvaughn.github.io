@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Jerad's Tip Calculator</title>
   <meta name="description" content="Mobile tip calculator with rounded suggestions and clear percentages." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -10,14 +10,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      /* Brand palette */
-      --steel-blue: #1A385A; /* Atomic Steel Blue */
+      --steel-blue: #1A385A;
       --seagull-blue: #769ABE;
       --tomato-orange: #E46F44;
       --pink-shell: #E8AA9B;
       --plum-violet: #DCD5DC;
 
-      /* Background + text */
       --bg: #769ABE;
       --card: #162b45;
       --text: #ECF1F7;
@@ -25,7 +23,6 @@
       --radius: 18px;
       --shadow: 0 12px 30px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.15);
 
-      /* Service performance scale (harmonized with palette) */
       --perf-red: #C5524A;
       --perf-orange: #E46F44;
       --perf-peach: #E8AA9B;
@@ -35,14 +32,21 @@
     }
 
     *{box-sizing:border-box}
-    html,body{height:100%}
+    html,body{min-height:100%}
     body{
       margin:0;
       font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
       color:var(--text);
       background: var(--bg);
-      display:flex; align-items:center; justify-content:center;
-      padding:28px 16px;
+
+      /* Ensure full viewport height and safe areas on iOS */
+      min-height: 100dvh;
+      min-height: -webkit-fill-available;
+      display:flex; align-items:flex-start; justify-content:center;
+      padding: calc(28px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+    }
+    @supports(height: 100svh){
+      body{ min-height: 100svh; }
     }
 
     .app{
@@ -53,6 +57,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 20px;
+      margin-top: env(safe-area-inset-top);
     }
 
     header{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
