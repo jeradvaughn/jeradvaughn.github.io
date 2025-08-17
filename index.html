@@ -3,89 +3,267 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>About Me — Your Name</title>
-  <meta name="description" content="Single-file About Me page you can customize and share." />
+  <title>Jerad's Tip Calculator</title>
+  <meta name="description" content="Mobile tip calculator with rounded suggestions and clear percentages." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg: #0b1020;
-      --bg-soft: #111634;
-      --card: #141a3a;
-      --text: #e6e8f5;
-      --muted: #a6add3;
-      --brand: #7c9cff;
-      --brand-2: #8ef0ff;
-      --ring: #7c9cff55;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      /* Brand palette */
+      --steel-blue: #1A385A; /* Atomic Steel Blue */
+      --seagull-blue: #769ABE;
+      --tomato-orange: #E46F44;
+      --pink-shell: #E8AA9B;
+      --plum-violet: #DCD5DC;
+
+      /* Background + text */
+      --bg: #769ABE;
+      --card: #162b45;
+      --text: #ECF1F7;
+      --muted: #B9C7D6;
       --radius: 18px;
-      --radius-sm: 12px;
-      --gap: clamp(14px, 2vw, 22px);
+      --shadow: 0 12px 30px rgba(0,0,0,.25), 0 2px 8px rgba(0,0,0,.15);
+
+      /* Service performance scale (harmonized with palette) */
+      --perf-red: #C5524A;
+      --perf-orange: #E46F44;
+      --perf-peach: #E8AA9B;
+      --perf-green: #5EA380;
+      --chip-text: #0b1826;
+      --focus: rgba(118,154,190,.9);
     }
-    @media (prefers-coor-scheme: light){
-      :root{
-        --bg:#f6f7fb; --bg-soft:#edf0fb; --card:#ffffff; --text:#171a29; --muted:#5b627e;
-        --brand:#2b5cff; --brand-2:#00bfe5; --ring:#2b5cff44; --shadow:0 8px 22px rgba(20,27,60,.12);
-      }
-    }
+
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-      color:var(--text); background:radial-gradient(90rem 90rem at -30% -20%, #1a225a33, transparent 60%),
-                           radial-gradient(70rem 70rem at 120% -10%, #00bfe522, transparent 60%),
-                           var(--bg);
-      line-height:1.55; letter-spacing:.01em;
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text);
+      background: var(--bg);
+      display:flex; align-items:center; justify-content:center;
+      padding:28px 16px;
     }
-    a{color:inherit; text-decoration:none}
-    .container{max-width:1100px; margin:0 auto; padding: clamp(18px, 3vw, 36px)}
 
-    .hero{display:grid; grid-template-columns:1.2fr .8fr; gap: clamp(16px, 3vw, 28px); align-items:center; padding-block: clamp(28px, 5vw, 72px)}
-    .portrait{aspect-ratio:1; border-radius:50%; background:#ccc; display:grid; place-items:center; font-weight:700; font-size: clamp(28px, 4vw, 40px);}
-
-    footer{margin-top:60px; padding:24px 0; color:var(--muted); font-size:14px; border-top:1px solid color-mix(in oklab, var(--text) 10%, transparent)}
-    .inline{display:flex; gap:10px; flex-wrap:wrap}
-
-    @media (max-width: 860px){
-      .hero{grid-template-columns:1fr}
+    .app{
+      width:100%; max-width:520px;
+      background: rgba(22,43,69,.8);
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(118,154,190,.25);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
     }
+
+    header{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+    .badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: #1A385A;
+      display: grid;
+      place-items: center;
+      color: #0c1521;
+      font-weight: 800;
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .25);
+      font-size: 18px;
+    }
+    h1{ font-size: clamp(20px, 5vw, 26px); line-height:1.15; margin:0; font-weight:700; letter-spacing:.2px }
+    p.sub{ margin:.25rem 0 0; color:var(--muted); font-size:14px }
+
+    .inputCard{
+      background: linear-gradient(180deg, #183052, #152b47);
+      border: 1px solid rgba(220,213,220,.25);
+      border-radius: var(--radius);
+      padding:16px; margin:12px 0 16px;
+    }
+    label{ display:block; font-size:12px; color:var(--plum-violet); margin-bottom:8px; letter-spacing:.3px }
+    .moneyInput{
+      display:flex; align-items:center; gap:10px;
+      background:#11243A; border:1px solid rgba(118,154,190,.4);
+      border-radius:14px; padding:12px 14px;
+    }
+    .moneyInput span{ color:var(--seagull-blue); opacity:.95; font-weight:600 }
+    .moneyInput input{ flex:1; background:transparent; border:none; outline:none; color:var(--text); font-size:18px; letter-spacing:.2px }
+    .hint{ font-size:12px; color:var(--muted); margin-top:8px }
+
+    .grid{ display:grid; grid-template-columns:1fr; gap:12px; margin-top:16px }
+    @media (min-width: 420px){ .grid{ grid-template-columns:repeat(2,1fr) } }
+
+    .card{
+      position:relative; cursor:pointer;
+      background: linear-gradient(180deg, #172F4F, #142A46);
+      border:1px solid rgba(118,154,190,.35);
+      border-radius: 16px; padding:14px 14px 16px; box-shadow: 0 1px 0 rgba(255,255,255,.04) inset;
+      transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease, outline .2s ease;
+    }
+    .card:hover{ transform: translateY(-2px); box-shadow: 0 14px 26px rgba(0,0,0,.25); border-color: rgba(118,154,190,.6) }
+    .card:focus-visible{ outline: 3px solid var(--focus); outline-offset: 2px }
+    .card.selected{ border-color: var(--perf-green); box-shadow: 0 16px 34px rgba(0,0,0,.32), 0 0 0 2px rgba(94,163,128,.25) inset }
+
+    .pill{
+      position:absolute; top:10px; right:10px;
+      padding:6px 10px; font-size:12px; font-weight:800; border-radius:999px; letter-spacing:.3px;
+      color:var(--chip-text);
+      box-shadow: 0 1px 0 rgba(255,255,255,.4) inset;
+    }
+    .pill.p10{ background: var(--perf-red) }
+    .pill.p15{ background: var(--perf-orange) }
+    .pill.p18{ background: var(--perf-peach) }
+    .pill.p20{ background: var(--perf-green) }
+
+    .big{ font-size: clamp(22px, 6vw, 28px); margin:6px 0 2px; font-weight:800 }
+    .small{ font-size: 12px; color: var(--muted) }
+    .row{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:8px }
+
+    .selection{
+      margin-top:18px;
+      background: linear-gradient(180deg, #183052, #152b47);
+      border:1px solid rgba(118,154,190,.45);
+      border-radius: var(--radius);
+      padding:14px 16px;
+      display:flex; justify-content:space-between; gap:12px; align-items:center;
+    }
+    .selection .label{ font-size:12px; color:var(--muted); margin-bottom:4px }
+    .selection .value{ font-weight:800; font-size:18px }
+    .selection .clearBtn{
+      margin-left:auto; appearance:none; border:none; border-radius:12px; padding:8px 10px; cursor:pointer;
+      background: rgba(94,163,128,.2); color:#d4efe0; font-weight:700;
+    }
+    .selection .clearBtn:hover{ background: rgba(94,163,128,.3) }
+
+    .footerNote{ margin-top:14px; font-size:12px; color:var(--muted); text-align:center }
+    .accent{ color: var(--tomato-orange); font-weight:700 }
   </style>
 </head>
 <body>
-  <main class="container">
-    <section class="hero" id="home">
+  <main class="app" role="application">
+    <header>
+      <div class="badge">💲</div>
       <div>
-        <h1>Jerad Vaughn - Facility Manager</h1>
-        <p>Hi everyone, I'm Jerad Vaughn, and I'll be joining the team as a new Facility Manager. Working for Google is a long-term aspiration realized and I couldn't be more excited. I'm looking forward to getting to know you all and working together.</p>
-        <section id="about">
-          <h2>About Me</h2>
-          <p>I have [Number] years of experience in [Your Field/Industry]. Prior to joining [Company Name], I worked at [Previous Company] where I [Briefly describe relevant experience or skills]. I'm passionate about [Relevant skills or interests] and I'm eager to contribute to [Specific team goals or projects].</p>
-          <p>Outside of work, I enjoy [Hobby/Interest].</p>
-          <p>I'm looking forward to collaborating with you all and learning from your expertise. Please don't hesitate to reach out if you have any questions or just want to chat!</p>
-        </section>
+        <h1>Jerad's Tip Calculator</h1>
+        <p class="sub">Enter your meal total. Get four totals rounded to the nearest dollar with true % back-calculations.</p>
       </div>
-      <div class="portrait" aria-label="Profile image placeholder">🙂</div>
+    </header>
+
+    <section class="inputCard" aria-labelledby="meal-label">
+      <label id="meal-label" for="meal">Meal Total (before tip)</label>
+      <div class="moneyInput">
+        <span>$</span>
+        <input id="meal" inputmode="decimal" autocomplete="off" placeholder="0.00" aria-describedby="meal-hint" />
+      </div>
+      <div class="hint" id="meal-hint">Presets: 10%, 15%, 18%, 20% — each rounded to the nearest dollar.</div>
     </section>
 
-    <section id="contact">
-      <h2>Contact / Socials</h2>
-      <p class="inline">
-        <a class="button ghost" href="https://www.linkedin.com/in/yourprofile" target="_blank">LinkedIn</a>
-        <a class="button ghost" href="https://www.facebook.com/yourprofile" target="_blank">Facebook</a>
-        <a class="button ghost" href="mailto:you@example.com" target="_blank">Email</a>
-      </p>
+    <section class="grid" aria-live="polite" id="grid"></section>
+
+    <section class="selection" id="selection" aria-live="polite" hidden>
+      <div>
+        <div class="label">Selected tip</div>
+        <div class="value" id="selTip">$0.00</div>
+      </div>
+      <div style="text-align:right">
+        <div class="label">Grand total</div>
+        <div class="value" id="selTotal">$0.00</div>
+      </div>
+      <button class="clearBtn" id="clearSel" aria-label="Clear selection">Clear</button>
     </section>
 
-    <footer>
-      <div class="container" style="padding:0">
-        © <span id="year"></span> [Your Name]. All rights reserved.
-      </div>
-    </footer>
+    <p class="footerNote"> <span class="accent">© 2025 Jerad Vaughn</span></p>
   </main>
 
   <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+    const grid = document.getElementById('grid');
+    const mealInput = document.getElementById('meal');
+    const selection = document.getElementById('selection');
+    const selTip = document.getElementById('selTip');
+    const selTotal = document.getElementById('selTotal');
+    const clearSel = document.getElementById('clearSel');
+
+    const formatter = new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' });
+
+    const PRESETS = [
+      { pct: 0.10, label: '10%', pill: 'p10' },
+      { pct: 0.15, label: '15%', pill: 'p15' },
+      { pct: 0.18, label: '18%', pill: 'p18' },
+      { pct: 0.20, label: '20%', pill: 'p20' },
+    ];
+
+    function calc(meal){
+      return PRESETS.map(({pct, label, pill}) => {
+        const rawTotal = meal * (1 + pct);
+        const total = Math.round(rawTotal);
+        const tip = Math.max(0, total - meal);
+        const effectivePct = meal > 0 ? (tip / meal) * 100 : 0;
+        return { label, pct, pill, tip, total, effectivePct };
+      });
+    }
+
+    function cardTemplate({label, pill, tip, total, effectivePct}, idx){
+      return `
+        <article class="card" role="button" tabindex="0" aria-pressed="false" data-idx="${idx}" data-tip="${tip}" data-total="${total}">
+          <div class="pill ${pill}">${label}</div>
+          <div class="big">${formatter.format(total)}</div>
+          <div class="small">rounded total</div>
+          <div class="row">
+            <div>
+              <div class="small">Tip amount</div>
+              <div style="font-weight:700">${formatter.format(tip)}</div>
+            </div>
+            <div style="text-align:right">
+              <div class="small">Tip as % of meal</div>
+              <div style="font-weight:700">${effectivePct.toFixed(1)}%</div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function render(meal){
+      const suggestions = calc(meal);
+      grid.innerHTML = suggestions.map(cardTemplate).join('');
+      grid.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('click', () => selectCard(card));
+        card.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectCard(card); }
+        });
+      });
+    }
+
+    function clearSelectionUI(){
+      selection.hidden = true;
+      selTip.textContent = formatter.format(0);
+      selTotal.textContent = formatter.format(0);
+      grid.querySelectorAll('.card').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
+    }
+
+    function selectCard(card){
+      grid.querySelectorAll('.card').forEach(c => { c.classList.remove('selected'); c.setAttribute('aria-pressed','false'); });
+      card.classList.add('selected');
+      card.setAttribute('aria-pressed','true');
+      const tip = Number(card.getAttribute('data-tip')) || 0;
+      const total = Number(card.getAttribute('data-total')) || 0;
+      selTip.textContent = formatter.format(tip);
+      selTotal.textContent = formatter.format(total);
+      selection.hidden = false;
+      selection.scrollIntoView({behavior:'smooth', block:'nearest'});
+    }
+
+    function parseMoney(input){
+      return (input || '').replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1');
+    }
+
+    mealInput.addEventListener('input', (e)=>{
+      const cleaned = parseMoney(e.target.value);
+      e.target.value = cleaned;
+      const meal = parseFloat(cleaned || '0');
+      render(isNaN(meal) ? 0 : meal);
+      clearSelectionUI();
+    });
+
+    clearSel.addEventListener('click', clearSelectionUI);
+
+    render(0);
   </script>
 </body>
 </html>
