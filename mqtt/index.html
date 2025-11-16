@@ -7,11 +7,33 @@
         body { font-family: Arial, sans-serif; padding: 20px; }
         #status { margin-bottom: 15px; font-weight: bold; }
         label, input, button { display: block; margin-bottom: 10px; }
+        
+        /* Set the width for inputs */
         input[type="text"] { width: 300px; padding: 5px; }
+        
+        /* Style the image to match input width */
+        #mqttImage { 
+            width: 300px; 
+            height: auto; /* Maintains the aspect ratio */
+            margin-bottom: 20px; /* Add space below the image */
+            display: block; /* Ensure it behaves like a block element */
+        }
+        
         button { padding: 10px 15px; cursor: pointer; }
+        
+        /* --- ADDED STATUS STYLES --- */
+        .status-connected {
+            color: green;
+        }
+        .status-failed {
+            color: red;
+        }
+        /* -------------------------- */
     </style>
 </head>
 <body>
+
+    <img id="mqttImage" src="images/boss_hog_vii.jpg" alt="Whistle Pig Boss Hog VII"> 
 
     <h2>WOTM MQTT Publisher</h2>
 
@@ -26,9 +48,9 @@
     <button onclick="publishMessage()">Publish Message</button>
 
     <script>
-        // MQTT Broker Settings
-        const host = 'broker.hivemq.com'; // Use a public test broker or your own
-        const port = 8884; // WebSocket port
+        // --- UPDATED MQTT Broker Settings for Secure Connection (WSS) ---
+        const host = 'broker.hivemq.com'; // Public test broker
+        const port = 8884; // Secure WebSocket (WSS) port
         const clientId = 'web_client_' + parseInt(Math.random() * 100000); // Unique client ID
 
         let client;
@@ -36,22 +58,35 @@
         // --- Connection Functions ---
 
         function onConnect() {
-            document.getElementById('status').innerText = 'Status: Connected!';
+            const statusElement = document.getElementById('status');
+            statusElement.innerText = 'Status: Connected!';
+            // ADDED: Set color to green
+            statusElement.classList.add('status-connected');
+            // REMOVED: In case it failed previously
+            statusElement.classList.remove('status-failed'); 
             console.log("Connected to MQTT broker");
         }
 
         function onFailure(responseObject) {
-            document.getElementById('status').innerText = 'Status: Connection Failed (' + responseObject.errorMessage + ')';
+            const statusElement = document.getElementById('status');
+            statusElement.innerText = 'Status: Connection Failed (' + responseObject.errorMessage + ')';
+            // ADDED: Set color to red
+            statusElement.classList.add('status-failed'); 
+            // REMOVED: In case it connected previously
+            statusElement.classList.remove('status-connected'); 
             console.log("Connection failed: " + responseObject.errorMessage);
         }
 
         function connect() {
+            // The third parameter "/mqtt" is the default path for Paho with HiveMQ
             client = new Paho.MQTT.Client(host, Number(port), "/mqtt", clientId);
 
             // Set callback handlers
             client.onConnectionLost = function (responseObject) {
                 if (responseObject.errorCode !== 0) {
                     document.getElementById('status').innerText = 'Status: Connection Lost!';
+                    document.getElementById('status').classList.add('status-failed'); // Set red on loss
+                    document.getElementById('status').classList.remove('status-connected');
                     console.log("onConnectionLost:" + responseObject.errorMessage);
                 }
             };
@@ -60,7 +95,7 @@
             client.connect({
                 onSuccess: onConnect,
                 onFailure: onFailure,
-                useSSL: true // Set to true if your broker uses wss://
+                useSSL: true // Required for port 8884
             });
         }
 
@@ -72,14 +107,16 @@
 
             if (!client || !client.isConnected()) {
                 document.getElementById('status').innerText = 'Status: Not Connected. Cannot publish.';
+                // Make sure the "Not Connected" message is styled red
+                document.getElementById('status').classList.add('status-failed');
                 return;
             }
 
             // Create a message object
             const message = new Paho.MQTT.Message(payload);
             message.destinationName = topic;
-            message.retained = false; // Set to true if you want the message to be retained
-            message.qos = 0; // Quality of Service (0, 1, or 2)
+            message.retained = false;
+            message.qos = 0; 
 
             try {
                 client.send(message);
@@ -87,6 +124,7 @@
             } catch (error) {
                 console.error("Error publishing message:", error);
                 document.getElementById('status').innerText = 'Status: Error publishing.';
+                document.getElementById('status').classList.add('status-failed');
             }
         }
 
