@@ -4,48 +4,115 @@
     <title>MQTT Web Publisher</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        #status { margin-bottom: 15px; font-weight: bold; }
-        label, input, button { display: block; margin-bottom: 10px; }
-        
-        /* Set the width for inputs */
-        input[type="text"] { width: 300px; padding: 5px; }
-        
-        /* Style the image to match input width */
-        #mqttImage { 
-            width: 300px; 
-            height: auto; /* Maintains the aspect ratio */
-            margin-bottom: 20px; /* Add space below the image */
-            display: block; /* Ensure it behaves like a block element */
+        /* 1. Global Layout: Black Background & Centering */
+        body { 
+            font-family: 'Inter', Arial, sans-serif; /* Using Inter font for a modern look */
+            background-color: #000000; /* Black site background */
+            display: flex; /* Use flexbox to center the container horizontally */
+            justify-content: center;
+            align-items: flex-start; /* Align content to the top (prevents vertical centering issues on long pages) */
+            min-height: 100vh; /* Ensure full viewport height */
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* 2. Main Content Container: White, Rounded, Gold Border */
+        #app-container {
+            background-color: white;
+            padding: 24px;
+            border-radius: 12px; /* Rounded corners */
+            border: 3px solid #FFD700; /* Gold 3px border */
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            max-width: 400px; /* Max width for desktop/tablet */
+            width: 90%; /* Responsive width for mobile */
+            margin-top: 5vh; /* Push content down a bit from the top */
+        }
+
+        /* 3. Heading and Status Text */
+        h2 { 
+            text-align: center; 
+            margin-top: 0; 
+            color: #333; 
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+        #status { 
+            margin-bottom: 15px; 
+            font-weight: bold; 
+            text-align: center; 
+            padding: 5px;
+            border-radius: 4px;
         }
         
-        button { padding: 10px 15px; cursor: pointer; }
+        /* 4. Inputs and Labels (Responsive) */
+        label, input, button { 
+            display: block; 
+            margin-bottom: 10px; 
+        }
         
-        /* --- ADDED STATUS STYLES --- */
+        input[type="text"] { 
+            width: 100%; /* Inputs take full width of container */
+            box-sizing: border-box; /* Ensures padding doesn't break the 100% width */
+            padding: 10px; 
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        
+        /* 5. Image Styling (Responsive) */
+        #mqttImage { 
+            width: 100%; /* Image takes full width of the container */
+            height: auto; /* Maintains the aspect ratio */
+            margin-bottom: 20px;
+            display: block; 
+            border-radius: 8px; /* Rounded corners for the image */
+        }
+        
+        /* 6. Button Styling */
+        button { 
+            width: 100%; 
+            padding: 12px 15px; 
+            cursor: pointer; 
+            background-color: #000000; /* Black button */
+            color: white; 
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #333333;
+        }
+
+        /* 7. Status Color Classes */
         .status-connected {
             color: green;
+            background-color: #e6ffe6; /* Light green background for visibility */
         }
         .status-failed {
             color: red;
+            background-color: #ffe6e6; /* Light red background for visibility */
         }
-        /* -------------------------- */
     </style>
 </head>
 <body>
 
-    <img id="mqttImage" src="images/boss_hog_vii.jpg" alt="Whistle Pig Boss Hog VII"> 
+    <!-- Container added to wrap all elements and apply the white, rounded, gold-bordered style -->
+    <div id="app-container">
 
-    <h2>WOTM MQTT Publisher</h2>
+        <img id="mqttImage" src="images/boss_hog_vii.jpg" alt="Whistle Pig Boss Hog VII"> 
 
-    <div id="status">Status: Connecting...</div>
+        <h2>WOTM MQTT Publisher</h2>
 
-    <label for="topicInput">MQTT Topic:</label>
-    <input type="text" id="topicInput" value="esp32clock/test8282/message">
+        <div id="status">Status: Connecting...</div>
 
-    <label for="messageInput">Message Payload:</label>
-    <input type="text" id="messageInput" value="Jack Daniels Black!">
+        <label for="topicInput">MQTT Topic:</label>
+        <input type="text" id="topicInput" value="esp32clock/test8282/message">
 
-    <button onclick="publishMessage()">Publish Message</button>
+        <label for="messageInput">Message Payload:</label>
+        <input type="text" id="messageInput" value="Jack Daniels Black!">
+
+        <button onclick="publishMessage()">Publish Message</button>
+    </div>
 
     <script>
         // --- UPDATED MQTT Broker Settings for Secure Connection (WSS) ---
@@ -60,9 +127,9 @@
         function onConnect() {
             const statusElement = document.getElementById('status');
             statusElement.innerText = 'Status: Connected!';
-            // ADDED: Set color to green
+            // Set color to green
             statusElement.classList.add('status-connected');
-            // REMOVED: In case it failed previously
+            // In case it failed previously
             statusElement.classList.remove('status-failed'); 
             console.log("Connected to MQTT broker");
         }
@@ -70,23 +137,25 @@
         function onFailure(responseObject) {
             const statusElement = document.getElementById('status');
             statusElement.innerText = 'Status: Connection Failed (' + responseObject.errorMessage + ')';
-            // ADDED: Set color to red
+            // Set color to red
             statusElement.classList.add('status-failed'); 
-            // REMOVED: In case it connected previously
+            // In case it connected previously
             statusElement.classList.remove('status-connected'); 
             console.log("Connection failed: " + responseObject.errorMessage);
         }
 
         function connect() {
+            const statusElement = document.getElementById('status');
+            
             // The third parameter "/mqtt" is the default path for Paho with HiveMQ
             client = new Paho.MQTT.Client(host, Number(port), "/mqtt", clientId);
 
             // Set callback handlers
             client.onConnectionLost = function (responseObject) {
                 if (responseObject.errorCode !== 0) {
-                    document.getElementById('status').innerText = 'Status: Connection Lost!';
-                    document.getElementById('status').classList.add('status-failed'); // Set red on loss
-                    document.getElementById('status').classList.remove('status-connected');
+                    statusElement.innerText = 'Status: Connection Lost!';
+                    statusElement.classList.add('status-failed'); // Set red on loss
+                    statusElement.classList.remove('status-connected');
                     console.log("onConnectionLost:" + responseObject.errorMessage);
                 }
             };
@@ -104,11 +173,12 @@
         function publishMessage() {
             const topic = document.getElementById('topicInput').value;
             const payload = document.getElementById('messageInput').value;
+            const statusElement = document.getElementById('status');
 
             if (!client || !client.isConnected()) {
-                document.getElementById('status').innerText = 'Status: Not Connected. Cannot publish.';
+                statusElement.innerText = 'Status: Not Connected. Cannot publish.';
                 // Make sure the "Not Connected" message is styled red
-                document.getElementById('status').classList.add('status-failed');
+                statusElement.classList.add('status-failed');
                 return;
             }
 
@@ -121,10 +191,22 @@
             try {
                 client.send(message);
                 console.log(`Published to topic "${topic}": "${payload}"`);
+                // Optionally provide publishing confirmation
+                const originalText = statusElement.innerText;
+                const originalClasses = statusElement.className;
+                
+                statusElement.innerText = 'Published!';
+                statusElement.className = 'status-connected'; // Temporarily green for publish confirmation
+                
+                setTimeout(() => {
+                    statusElement.innerText = originalText;
+                    statusElement.className = originalClasses;
+                }, 1500); // Revert after 1.5 seconds
+                
             } catch (error) {
                 console.error("Error publishing message:", error);
-                document.getElementById('status').innerText = 'Status: Error publishing.';
-                document.getElementById('status').classList.add('status-failed');
+                statusElement.innerText = 'Status: Error publishing.';
+                statusElement.classList.add('status-failed');
             }
         }
 
