@@ -1,1 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MQTT Web Publisher</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #status { margin-bottom: 15px; font-weight: bold; }
+        label, input, button { display: block; margin-bottom: 10px; }
+        
+        /* Set the width for inputs */
+        input[type="text"] { width: 300px; padding: 5px; }
+        
+        /* Style the image to match input width */
+        #mqttImage { 
+            width: 300px; 
+            height: auto; /* Maintains the aspect ratio */
+            margin-bottom: 20px; /* Add space below the image */
+            display: block; /* Ensure it behaves like a block element */
+        }
+        
+        button { padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
 
+    <img id="mqttImage" src="/images/bosshog.jpg" alt="MQTT Icon"> 
+
+    <h2>MQTT Message Publisher</h2>
+
+    <div id="status">Status: Connecting...</div>
+
+    <label for="topicInput">MQTT Topic:</label>
+    <input type="text" id="topicInput" value="test/web/message">
+
+    <label for="messageInput">Message Payload:</label>
+    <input type="text" id="messageInput" value="Hello from the updated web page!">
+
+    <button onclick="publishMessage()">Publish Message</button>
+
+    <script>
+        // --- UPDATED MQTT Broker Settings for Secure Connection (WSS) ---
+        const host = 'broker.hivemq.com'; // Public test broker
+        const port = 8884; // Secure WebSocket (WSS) port
+        const clientId = 'web_client_' + parseInt(Math.random() * 100000); // Unique client ID
+
+        let client;
+
+        // --- Connection Functions ---
+
+        function onConnect() {
+            document.getElementById('status').innerText = 'Status: Connected!';
+            console.log("Connected to MQTT broker");
+        }
+
+        function onFailure(responseObject) {
+            document.getElementById('status').innerText = 'Status: Connection Failed (' + responseObject.errorMessage + ')';
+            console.log("Connection failed: " + responseObject.errorMessage);
+        }
+
+        function connect() {
+            // The third parameter "/mqtt" is the default path for Paho with HiveMQ
+            client = new Paho.MQTT.Client(host, Number(port), "/mqtt", clientId);
+
+            // Set callback handlers
+            client.onConnectionLost = function (responseObject) {
+                if (responseObject.errorCode !== 0) {
+                    document.getElementById('status').innerText = 'Status: Connection Lost!';
+                    console.log("onConnectionLost:" + responseObject.errorMessage);
+                }
+            };
+
+            // Connect the client
+            client.connect({
+                onSuccess: onConnect,
+                onFailure: onFailure,
+                useSSL: true // Required for port 8884
+            });
+        }
+
+        // --- Publishing Function ---
+
+        function publishMessage() {
+            const topic = document.getElementById('topicInput').value;
+            const payload = document.getElementById('messageInput').value;
+
+            if (!client || !client.isConnected()) {
+                document.getElementById('status').innerText = 'Status: Not Connected. Cannot publish.';
+                return;
+            }
+
+            // Create a message object
+            const message = new Paho.MQTT.Message(payload);
+            message.destinationName = topic;
+            message.retained = false;
+            message.qos = 0; 
+
+            try {
+                client.send(message);
+                console.log(`Published to topic "${topic}": "${payload}"`);
+            } catch (error) {
+                console.error("Error publishing message:", error);
+                document.getElementById('status').innerText = 'Status: Error publishing.';
+            }
+        }
+
+        // Initialize connection when the page loads
+        window.onload = connect;
+
+    </script>
+</body>
+</html>
