@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MQTT Web Publisher</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        #status { margin-bottom: 15px; font-weight: bold; }
+        label, input, button { display: block; margin-bottom: 10px; }
+        input[type="text"] { width: 300px; padding: 5px; }
+        button { padding: 10px 15px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <h2>MQTT Message Publisher</h2>
+
+    <div id="status">Status: Connecting...</div>
+
+    <label for="topicInput">MQTT Topic:</label>
+    <input type="text" id="topicInput" value="test/web/message">
+
+    <label for="messageInput">Message Payload:</label>
+    <input type="text" id="messageInput" value="Hello from the web page!">
+
+    <button onclick="publishMessage()">Publish Message</button>
+
+    <script>
+        // MQTT Broker Settings
+        const host = 'broker.hivemq.com'; // Use a public test broker or your own
+        const port = 8000; // WebSocket port
+        const clientId = 'web_client_' + parseInt(Math.random() * 100000); // Unique client ID
+
+        let client;
+
+        // --- Connection Functions ---
+
+        function onConnect() {
+            document.getElementById('status').innerText = 'Status: Connected!';
+            console.log("Connected to MQTT broker");
+        }
+
+        function onFailure(responseObject) {
+            document.getElementById('status').innerText = 'Status: Connection Failed (' + responseObject.errorMessage + ')';
+            console.log("Connection failed: " + responseObject.errorMessage);
+        }
+
+        function connect() {
+            client = new Paho.MQTT.Client(host, Number(port), "/mqtt", clientId);
+
+            // Set callback handlers
+            client.onConnectionLost = function (responseObject) {
+                if (responseObject.errorCode !== 0) {
+                    document.getElementById('status').innerText = 'Status: Connection Lost!';
+                    console.log("onConnectionLost:" + responseObject.errorMessage);
+                }
+            };
+
+            // Connect the client
+            client.connect({
+                onSuccess: onConnect,
+                onFailure: onFailure,
+                useSSL: false // Set to true if your broker uses wss://
+            });
+        }
+
+        // --- Publishing Function ---
+
+        function publishMessage() {
+            const topic = document.getElementById('topicInput').value;
+            const payload = document.getElementById('messageInput').value;
+
+            if (!client || !client.isConnected()) {
+                document.getElementById('status').innerText = 'Status: Not Connected. Cannot publish.';
+                return;
+            }
+
+            // Create a message object
+            const message = new Paho.MQTT.Message(payload);
+            message.destinationName = topic;
+            message.retained = false; // Set to true if you want the message to be retained
+            message.qos = 0; // Quality of Service (0, 1, or 2)
+
+            try {
+                client.send(message);
+                console.log(`Published to topic "${topic}": "${payload}"`);
+            } catch (error) {
+                console.error("Error publishing message:", error);
+                document.getElementById('status').innerText = 'Status: Error publishing.';
+            }
+        }
+
+        // Initialize connection when the page loads
+        window.onload = connect;
+
+    </script>
+</body>
+</html>
