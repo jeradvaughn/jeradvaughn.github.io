@@ -189,10 +189,10 @@
         function disconnectClient() {
             if (client && client.isConnected()) {
                 client.disconnect();
-                updateStatus('Disconnected', '#FFFFFF'); /* White text for disconnected */
+                updateStatus('Disconnected', '#EA0D0D'); /* White text for disconnected */
                 console.log("Disconnected from broker.");
             } else {
-                updateStatus('Disconnected', '#FFFFFF'); 
+                updateStatus('Disconnected', '#EA0D0D'); 
                 console.log("Client is not connected.");
             }
         }
