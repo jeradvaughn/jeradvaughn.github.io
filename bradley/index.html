@@ -51,7 +51,7 @@
     <script>
         // --- MQTT Configuration ---
         const HOST = 'broker.hivemq.com'; // HiveMQ public broker
-        const PORT = 8000; // WebSocket port
+        const PORT = 8884; // WebSocket port
         const CLIENT_ID = 'web_client_' + Math.random().toString(16).substr(2, 8); // Unique client ID
         
         // WLED Topics (from your information)
@@ -82,7 +82,7 @@
                 onSuccess: onConnect,
                 onFailure: onFailure,
                 cleanSession: true,
-                useSSL: false
+                useSSL: true
             });
         }
 
