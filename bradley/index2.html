@@ -72,12 +72,12 @@
     </style>
 </head>
 <body>
-    <h1>🎄 Bradley's Light Controller</h1>
+    <h1>🎄Bradley's Light Controller🎄</h1>
 
     <div class="control-section">
         <h2>Connection</h2>
         <div class="button-group">
-            <button onclick="connectClient()">Connect to Broker</button>
+            <button onclick="connectClient()">Connect to Lights</button>
             <button class="disconnect" onclick="disconnectClient()">Disconnect</button>
         </div>
         <p>Status: <span id="connectionStatus">Disconnected</span></p>
@@ -136,7 +136,7 @@
         function connectClient() {
             if (client && client.isConnected()) {
                 console.log("Client already connected.");
-                updateStatus('Connected (Broker: HiveMQ)', 'lightgreen');
+                updateStatus('Connected (Vaughn Snowflake)', 'lightgreen');
                 return;
             }
 
