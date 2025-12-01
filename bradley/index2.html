@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WLED MQTT Christmas Control</title>
+    <title>WLED MQTT Holiday Controller</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
     <style>
         /* --- CHRISTMAS THEME STYLES --- */
@@ -17,10 +17,10 @@
         }
         h1 { 
             text-align: center; 
-            color: #FFD700; /* Gold/Yellow for Heading */
+            color: #FFFFFF; /* Gold/Yellow for Heading */
         }
         h2 {
-            color: #B22222; /* Firebrick Red for Section Headers */
+            color: #FFFFFF; /* Firebrick Red for Section Headers */
         }
         .control-section { 
             border: 1px solid #B22222; /* Red border */
@@ -47,7 +47,7 @@
         #brightnessSlider { width: 100%; }
         /* Style for inputs that aren't buttons */
         input[type="range"], input[type="color"] {
-            background-color: #38761d; /* Slightly lighter green for contrast */
+            background-color: ##086100; /* Slightly lighter green for contrast */
             border: 1px solid #B22222;
             padding: 5px;
             border-radius: 5px;
@@ -84,7 +84,7 @@
     </div>
 
     <div class="control-section">
-        <h2>Lights Control</h2>
+        <h2>Lights Control (Brightness & Color)</h2>
         
         <div class="button-group">
             <button onclick="publishBrightness('ON')">Turn ON</button>
@@ -99,15 +99,23 @@
         <input type="color" id="colorPicker" value="#FFFFFF" onchange="publishColor(this.value)">
     </div>
 
+    <div class="control-section">
+        <h2>API Command Tester</h2>
+        <label for="apiPayload">Enter API Payload (e.g., FX=1 or {"bri":50}):</label>
+        <input type="text" id="apiPayload" placeholder="FX=73" style="width: 95%; padding: 8px; margin-bottom: 10px; color: black; background-color: white;">
+        <button onclick="publishApiCommand()">Send API Command</button>
+    </div>
+
     <script>
         // --- MQTT Configuration ---
         const HOST = 'broker.hivemq.com'; 
-        const PORT = 8884; // Secure WebSocket port
+        const PORT = 8884; // Secure WebSocket port, required for reliable browser connection
         const CLIENT_ID = 'web_client_' + Math.random().toString(16).substr(2, 8); 
         
         // WLED Topics 
-        const DEVICE_TOPIC_BRIGHTNESS = 'wled/95ec80';
-        const DEVICE_TOPIC_COLOR = 'wled/95ec80/col'; 
+        const DEVICE_TOPIC_BRIGHTNESS = 'wled/95ec80'; // [mqttDeviceTopic]
+        const DEVICE_TOPIC_COLOR = 'wled/95ec80/col'; // [mqttDeviceTopic]/col
+        const DEVICE_TOPIC_API = 'wled/95ec80/api';   // [mqttDeviceTopic]/api
 
         let client;
 
@@ -140,7 +148,7 @@
                 onSuccess: onConnect,
                 onFailure: onFailure,
                 cleanSession: true,
-                useSSL: true
+                useSSL: true // CRITICAL for browser security with public broker
             });
         }
 
@@ -229,6 +237,21 @@
          */
         function publishColor(hexColor) {
             publishMessage(DEVICE_TOPIC_COLOR, hexColor);
+        }
+
+        /**
+         * Publishes the command entered in the API Payload text field.
+         */
+        function publishApiCommand() {
+            const payload = document.getElementById('apiPayload').value;
+            
+            if (payload) {
+                // Publish to the API topic
+                publishMessage(DEVICE_TOPIC_API, payload);
+                document.getElementById('apiPayload').value = ''; // Clear input after sending
+            } else {
+                alert('Please enter an API command payload.');
+            }
         }
         
         // Set initial status
