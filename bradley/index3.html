@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>WLED MQTT Controller</title>
+
+<style>
+    body {
+        font-family: sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #AD242C;
+        color: #ECDEB9;
+    }
+
+    .section {
+        border: 2px solid #ECDEB9;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        background-color: rgba(0,0,0,0.1);
+    }
+
+    .section-title {
+        font-size: 24px;
+        margin-bottom: 12px;
+        font-weight: bold;
+        text-transform: uppercase;
+    }
+
+    /* Split the top section into 2 vertical boxes */
+    .connection-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .button {
+        padding: 12px 20px;
+        margin-right: 10px;
+        background: #333;
+        border: 2px solid #ECDEB9;
+        color: #ECDEB9;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    .button:hover {
+        background: #555;
+    }
+
+    input, select {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ECDEB9;
+        background: #333;
+        color: #ECDEB9;
+    }
+
+    .status-dot {
+        height: 14px;
+        width: 14px;
+        background-color: red;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 10px;
+        border: 2px solid #ECDEB9;
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
+
+<script>
+let client = null;
+
+function connectClient() {
+    const clientId = document.getElementById("clientId").value;
+    const host = document.getElementById("host").value;
+    const port = Number(document.getElementById("port").value);
+
+    client = new Paho.MQTT.Client(host, port, clientId);
+
+    client.onConnectionLost = () => {
+        document.getElementById("status").style.background = "red";
+        console.log("Connection lost");
+    };
+
+    client.onMessageArrived = (msg) => {
+        document.getElementById("console").value += 
+            "Received: " + msg.destinationName + " → " + msg.payloadString + "\n";
+    };
+
+    client.connect({
+        onSuccess: () => {
+            document.getElementById("status").style.background = "green";
+            console.log("Connected");
+        },
+        onFailure: () => {
+            document.getElementById("status").style.background = "red";
+            console.log("Failed to connect");
+        },
+        useSSL: true
+    });
+}
+
+function sendPower(state) {
+    const topic = document.getElementById("topic").value + "/api";
+    const message = new Paho.MQTT.Message(JSON.stringify({ on: state }));
+    message.destinationName = topic;
+    client.send(message);
+}
+
+function sendAPI() {
+    const topic = document.getElementById("apiTopic").value;
+    const payload = document.getElementById("apiPayload").value;
+    const msg = new Paho.MQTT.Message(payload);
+    msg.destinationName = topic;
+    client.send(msg);
+}
+</script>
+</head>
+
+<body>
+
+<!-- 🔌 CONNECTION + POWER (split into two boxes) -->
+<div class="connection-wrapper section">
+
+    <!-- LEFT: CONNECTION -->
+    <div>
+        <div class="section-title">Connection</div>
+
+        <label>Client ID:</label>
+        <input id="clientId" value="WLED-95ec80"><br><br>
+
+        <label>Host:</label>
+        <input id="host" value="public.mqtthq.com"><br><br>
+
+        <label>Port:</label>
+        <input id="port" value="8084"><br><br>
+
+        <button class="button" onclick="connectClient()">Connect</button>
+
+        <span class="status-dot" id="status"></span>
+    </div>
+
+    <!-- RIGHT: POWER -->
+    <div>
+        <div class="section-title">Power</div>
+
+        <label>Device Topic:</label>
+        <input id="topic" value="wled/95ec80"><br><br>
+
+        <button class="button" onclick="sendPower(true)">ON</button>
+        <button class="button" onclick="sendPower(false)">OFF</button>
+        <button class="button" onclick="sendPower('toggle')">Toggle</button>
+    </div>
+
+</div>
+
+<!-- 💡 LIGHTS CONTROL (brightness + color only) -->
+<div class="section">
+    <div class="section-title">Lights Control</div>
+
+    <label>Brightness:</label>
+    <input type="range" min="0" max="255"><br><br>
+
+    <label>Color:</label>
+    <input type="color">
+</div>
+
+<!-- 🧪 API COMMAND TESTER -->
+<div class="section">
+    <div class="section-title">API Command Tester</div>
+
+    <label>Topic:</label>
+    <input id="apiTopic" value="wled/95ec80/api"><br><br>
+
+    <label>Payload:</label>
+    <input id="apiPayload" value="{ &quot;fx&quot;: 1 }"><br><br>
+
+    <button class="button" onclick="sendAPI()">Send API Command</button>
+
+    <br><br>
+    <textarea id="console" style="width:100%;height:150px;"></textarea>
+</div>
+
+</body>
+</html>
