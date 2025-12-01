@@ -15,6 +15,7 @@
 <body>
   <div class="card">
     <h2>WLED MQTT Control</h2>
+    <div id="status" style="margin:10px 0; padding:6px; border-radius:6px; background:#ccc; text-align:center;">Connecting...</div>
 
     <label>Brightness</label>
     <input type="range" id="brightness" min="0" max="255" />
@@ -35,6 +36,10 @@
 
     client.on("connect", () => {
       console.log("Connected to HiveMQ MQTT Broker");
+      document.getElementById("status").innerText = "Connected";
+      document.getElementById("status").style.background = "#28a745";
+      document.getElementById("status").style.color = "white";
+
       // Subscribe to WLED state topics
       client.subscribe(`${mqttDeviceTopic}/g`);
       client.subscribe(`${mqttDeviceTopic}/c`);
@@ -45,6 +50,28 @@
       client.subscribe(`${mqttGroupTopic}`);
       client.subscribe(`${mqttGroupTopic}/col`);
       client.subscribe(`${mqttGroupTopic}/api`);
+    });
+      // Subscribe to WLED state topics
+      client.subscribe(`${mqttDeviceTopic}/g`);
+      client.subscribe(`${mqttDeviceTopic}/c`);
+      client.subscribe(`${mqttDeviceTopic}/v`);
+
+      // Group topic subscriptions
+      const mqttGroupTopic = "wled/all";
+      client.subscribe(`${mqttGroupTopic}`);
+      client.subscribe(`${mqttGroupTopic}/col`);
+      client.subscribe(`${mqttGroupTopic}/api`);
+    });
+
+    client.on("reconnect", () => {
+      document.getElementById("status").innerText = "Reconnecting...";
+      document.getElementById("status").style.background = "#ffc107";
+    });
+
+    client.on("close", () => {
+      document.getElementById("status").innerText = "Disconnected";
+      document.getElementById("status").style.background = "#dc3545";
+      document.getElementById("status").style.color = "white";
     });
 
     client.on("message", (topic, message) => {
