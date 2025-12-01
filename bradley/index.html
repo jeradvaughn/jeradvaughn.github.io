@@ -4,12 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WLED MQTT Controller</title>
-  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
-    .card { background: white; padding: 20px; border-radius: 12px; width: 320px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
-    input[type=color], input[type=range] { width: 100%; margin-top: 10px; }
+    .card { background: white; padding: 20px; border-radius: 12px; width: 360px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    input[type=color], input[type=range] { width: 100%; margin-top: 8px; }
     button { padding: 10px; width: 100%; margin-top: 10px; border: none; border-radius: 8px; background: #007bff; color: white; cursor: pointer; }
+    .row { display:flex; gap:8px }
+    .row button { flex:1 }
+    #log { margin-top:10px; font-size:12px; color:#333; max-height:160px; overflow:auto; background:#fafafa; padding:8px; border-radius:6px; border:1px solid #eee }
   </style>
 </head>
 <body>
@@ -17,85 +20,175 @@
     <h2>WLED MQTT Control</h2>
     <div id="status" style="margin:10px 0; padding:6px; border-radius:6px; background:#ccc; text-align:center;">Connecting...</div>
 
-    <label>Brightness</label>
-    <input type="range" id="brightness" min="0" max="255" />
+    <label>Brightness <span id="brightnessVal">0</span></label>
+    <input type="range" id="brightness" min="0" max="255" value="0" />
 
     <label>Color</label>
-    <input type="color" id="color" />
+    <input type="color" id="color" value="#ffffff" />
 
-    <button id="powerOn">Power ON</button>
-    <button id="powerOff" style="background:#dc3545">Power OFF</button>
-    <button id="toggle" style="background:#6c757d">Toggle</button>
+    <div class="row" style="margin-top:8px;">
+      <button id="powerOn">Power ON</button>
+      <button id="powerOff" style="background:#dc3545">Power OFF</button>
+      <button id="toggle" style="background:#6c757d">Toggle</button>
+    </div>
+
+    <div id="log"></div>
   </div>
 
   <script>
-    const brokerUrl = "wss://broker.hivemq.com:8884/mqtt";
-    const mqttDeviceTopic = "wled/95ec80"; // change as needed
+    // Configuration
+    const HOST = "broker.hivemq.com";
+    const PORT = 8884; // secure websocket port used by public HiveMQ
+    const CLIENT_ID = "WLED-95ec80";
+    const mqttDeviceTopic = "wled/95ec80";
+    const mqttGroupTopic = "wled/all";
 
-    const client = mqtt.connect(brokerUrl, { clientId: "WLED-95ec80" });
+    const statusEl = document.getElementById('status');
+    const logEl = document.getElementById('log');
+    const brightnessEl = document.getElementById('brightness');
+    const brightnessValEl = document.getElementById('brightnessVal');
+    const colorEl = document.getElementById('color');
 
-    client.on("connect", () => {
-      console.log("Connected to HiveMQ MQTT Broker");
-      document.getElementById("status").innerText = "Connected";
-      document.getElementById("status").style.background = "#28a745";
-      document.getElementById("status").style.color = "white";
-
-      // Subscribe to WLED state topics
-      client.subscribe(`${mqttDeviceTopic}/g`);
-      client.subscribe(`${mqttDeviceTopic}/c`);
-      client.subscribe(`${mqttDeviceTopic}/v`);
-
-      // Group topic subscriptions
-      const mqttGroupTopic = "wled/all";
-      client.subscribe(`${mqttGroupTopic}`);
-      client.subscribe(`${mqttGroupTopic}/col`);
-      client.subscribe(`${mqttGroupTopic}/api`);
-    });
-      // Subscribe to WLED state topics
-      client.subscribe(`${mqttDeviceTopic}/g`);
-      client.subscribe(`${mqttDeviceTopic}/c`);
-      client.subscribe(`${mqttDeviceTopic}/v`);
-
-      // Group topic subscriptions
-      const mqttGroupTopic = "wled/all";
-      client.subscribe(`${mqttGroupTopic}`);
-      client.subscribe(`${mqttGroupTopic}/col`);
-      client.subscribe(`${mqttGroupTopic}/api`);
-    });
-
-    client.on("reconnect", () => {
-      document.getElementById("status").innerText = "Reconnecting...";
-      document.getElementById("status").style.background = "#ffc107";
-    });
-
-    client.on("close", () => {
-      document.getElementById("status").innerText = "Disconnected";
-      document.getElementById("status").style.background = "#dc3545";
-      document.getElementById("status").style.color = "white";
-    });
-
-    client.on("message", (topic, message) => {
-      console.log("MQTT Message:", topic, message.toString());
-    });
-
-    function send(topic, payload) {
-      client.publish(topic, payload.toString());
+    function log(...args) {
+      console.log(...args);
+      try {
+        logEl.innerText += args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ') + '\n';
+        logEl.scrollTop = logEl.scrollHeight;
+      } catch (e) { /* ignore logging errors */ }
     }
 
-    // Brightness control
-    document.getElementById("brightness").addEventListener("input", e => {
-      send(mqttDeviceTopic, e.target.value);
+    // Create Paho client
+    const client = new Paho.MQTT.Client(HOST, Number(PORT), CLIENT_ID);
+
+    client.onConnectionLost = (response) => {
+      statusEl.innerText = 'Disconnected';
+      statusEl.style.background = '#dc3545';
+      statusEl.style.color = 'white';
+      log('Connection lost', response && response.errorMessage ? response.errorMessage : '');
+      // simple auto-reconnect after a short delay
+      setTimeout(() => {
+        statusEl.innerText = 'Reconnecting...';
+        statusEl.style.background = '#ffc107';
+        tryConnect();
+      }, 2000);
+    };
+
+    client.onMessageArrived = (message) => {
+      try {
+        log('MSG', message.destinationName, message.payloadString);
+        // reflect brightness or color updates if they come from device topics
+        if (message.destinationName === `${mqttDeviceTopic}/g`) {
+          const val = message.payloadString;
+          const r = Number(val);
+          if (!Number.isNaN(r)) {
+            brightnessEl.value = r;
+            brightnessValEl.innerText = r;
+          }
+        }
+        if (message.destinationName === `${mqttDeviceTopic}/c`) {
+          const col = message.payloadString.trim();
+          // WLED publishes #RRGGBB or #WWRRGGBB - take last 7 chars if starts with '#', otherwise add '#'
+          let hex = '#ffffff';
+          if (col.startsWith('#')) {
+            // take last 7 chars (e.g. #WWRRGGBB -> last 7 will include # and six chars)
+            hex = col.slice(-7);
+          } else if (/^\d+$/.test(col)) {
+            // decimal 32-bit -> convert to hex
+            const num = Number(col);
+            const h = (num >>> 0).toString(16).padStart(8, '0');
+            // take last 6 for RRGGBB
+            hex = '#' + h.slice(-6);
+          } else {
+            // fallback: try to extract hex anywhere
+            const m = col.match(/#?[0-9A-Fa-f]{6,8}/);
+            if (m) {
+              const s = m[0].startsWith('#') ? m[0] : ('#' + m[0]);
+              hex = s.length === 7 ? s : ('#' + s.slice(-6));
+            }
+          }
+          try {
+            colorEl.value = hex;
+          } catch (e) { /* ignore invalid color set */ }
+        }
+      } catch (err) {
+        // ensure any runtime error here doesn't break the entire script
+        log('onMessageArrived handler error:', err && err.message ? err.message : err);
+      }
+    };
+
+    function tryConnect() {
+      client.connect({
+        useSSL: true,
+        onSuccess: () => {
+          statusEl.innerText = 'Connected';
+          statusEl.style.background = '#28a745';
+          statusEl.style.color = 'white';
+
+          // subscribe to device and group topics
+          client.subscribe(`${mqttDeviceTopic}/g`);
+          client.subscribe(`${mqttDeviceTopic}/c`);
+          client.subscribe(`${mqttDeviceTopic}/v`);
+          client.subscribe(`${mqttGroupTopic}`);
+          client.subscribe(`${mqttGroupTopic}/col`);
+          client.subscribe(`${mqttGroupTopic}/api`);
+
+          log('Connected to', HOST + ':' + PORT);
+        },
+        onFailure: (err) => {
+          statusEl.innerText = 'Connect Failed';
+          statusEl.style.background = '#dc3545';
+          statusEl.style.color = 'white';
+          log('Connect failed', err && err.errorMessage ? err.errorMessage : JSON.stringify(err));
+          // retry after a delay
+          setTimeout(() => tryConnect(), 3000);
+        }
+      });
+    }
+
+    tryConnect();
+
+    function send(topic, payload) {
+      try {
+        const msg = new Paho.MQTT.Message(String(payload));
+        msg.destinationName = topic;
+        client.send(msg);
+        log('PUB', topic, payload);
+      } catch (e) {
+        log('Send error:', e && e.message ? e.message : e);
+      }
+    }
+
+    // UI bindings - publish to WLED /api as JSON
+    brightnessEl.addEventListener('input', e => {
+      const v = Number(e.target.value);
+      brightnessValEl.innerText = v;
+      const payload = JSON.stringify({ b: v });
+      send(`${mqttDeviceTopic}/api`, payload);
     });
 
-    // Color control
-    document.getElementById("color").addEventListener("input", e => {
-      const hex = e.target.value.toUpperCase();
-      send(`${mqttDeviceTopic}/col`, hex);
+    colorEl.addEventListener('input', e => {
+      // convert #RRGGBB to r,g,b
+      const hex = e.target.value || '#ffffff';
+      const r = parseInt(hex.substr(1,2),16);
+      const g = parseInt(hex.substr(3,2),16);
+      const b = parseInt(hex.substr(5,2),16);
+      const payload = JSON.stringify({ seg: [{ col: [[r, g, b]] }] });
+      send(`${mqttDeviceTopic}/api`, payload);
     });
 
-    document.getElementById("powerOn").onclick = () => send(mqttDeviceTopic, "ON");
-    document.getElementById("powerOff").onclick = () => send(mqttDeviceTopic, "OFF");
-    document.getElementById("toggle").onclick = () => send(mqttDeviceTopic, "T");
+    document.getElementById('powerOn').onclick = () => {
+      const payload = JSON.stringify({ on: true });
+      send(`${mqttDeviceTopic}/api`, payload);
+    };
+    document.getElementById('powerOff').onclick = () => {
+      const payload = JSON.stringify({ on: false });
+      send(`${mqttDeviceTopic}/api`, payload);
+    };
+    document.getElementById('toggle').onclick = () => {
+      const payload = JSON.stringify({ on: "t" });
+      send(`${mqttDeviceTopic}/api`, payload);
+    };
+
   </script>
 </body>
 </html>
