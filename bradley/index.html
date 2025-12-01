@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WLED MQTT Controller</title>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+.card { background: white; padding: 20px; border-radius: 12px; width: 320px; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+input[type=color], input[type=range] { width: 100%; margin-top: 10px; }
+button { padding: 10px; width: 100%; margin-top: 10px; border: none; border-radius: 8px; background: #007bff; color: white; cursor: pointer; }
+</style>
+</head>
+<body>
+<div class="card">
+<h2>WLED MQTT Control</h2>
+
+
+<label>Brightness</label>
+<input type="range" id="brightness" min="0" max="255" />
+
+
+<label>Color</label>
+<input type="color" id="color" />
+
+
+<button id="powerOn">Power ON</button>
+<button id="powerOff" style="background:#dc3545">Power OFF</button>
+<button id="toggle" style="background:#6c757d">Toggle</button>
+</div>
+
+
+<script>
+const brokerUrl = "wss://broker.hivemq.com:8884/mqtt";
+const mqttDeviceTopic = "wled/device1"; // change as needed
+
+
+const client = mqtt.connect(brokerUrl);
+
+
+client.on("connect", () => {
+console.log("Connected to HiveMQ MQTT Broker");
+// Subscribe to WLED state topics
+client.subscribe(`${mqttDeviceTopic}/g`);
+client.subscribe(`${mqttDeviceTopic}/c`);
+client.subscribe(`${mqttDeviceTopic}/v`);
+});
+
+
+client.on("message", (topic, message) => {
+console.log("MQTT Message:", topic, message.toString());
+});
+
+
+function send(topic, payload) {
+client.publish(topic, payload.toString());
+}
+
+
+// Brightness control
+document.getElementById("brightness").addEventListener("input", e => {
+send(mqttDeviceTopic, e.target.value);
+});
+
+
+// Color control
+document.getElementById("color").addEventListener("input", e => {
+const hex = e.target.value.toUpperCase();
+send(`${mqttDeviceTopic}/col`, hex);
+});
+
+
+document.getElementById("powerOn").onclick = () => send(mqttDeviceTopic, "ON");
+document.getElementById("powerOff").onclick = () => send(mqttDeviceTopic, "OFF");
+document.getElementById("toggle").onclick = () => send(mqttDeviceTopic, "T");
+</script>
+</body>
+</html>
