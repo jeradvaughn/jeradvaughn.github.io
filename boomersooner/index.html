@@ -28,7 +28,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
 
-        /* The Full-Screen Overlay */
         #boomModal {
             display: none;
             position: fixed;
@@ -40,36 +39,28 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            /* The Flashing Background Animation */
             animation: flashBg 0.5s infinite;
         }
 
-        /* The Growing & Flashing Text */
         .boomer-text {
             font-size: 15vw;
             font-family: 'Impact', sans-serif;
             font-weight: 900;
             text-align: center;
             line-height: 0.9;
-            /* Apply Grow and Color Flash animations */
             animation: grow 0.5s ease-out forwards, flashText 0.1s infinite;
         }
 
-        /* ANIMATIONS */
-
-        /* 1. Makes the text explode outward */
         @keyframes grow {
             0% { transform: scale(0); opacity: 0; }
             100% { transform: scale(1.2); opacity: 1; }
         }
 
-        /* 2. Flashes the background between white and crimson */
         @keyframes flashBg {
             0%, 100% { background-color: white; }
             50% { background-color: #841617; }
         }
 
-        /* 3. Flashes the text color to contrast the background */
         @keyframes flashText {
             0%, 100% { color: #841617; }
             50% { color: white; }
@@ -98,13 +89,35 @@
         <button class="close-btn" onclick="hideBoomer()">STOP THE MADNESS</button>
     </div>
 
+    <!-- AUDIO -->
+    <audio id="boomerAudio" src="sooner_fight_song.mp3"></audio>
+
     <script>
+        const audio = document.getElementById('boomerAudio');
+
         function showBoomer() {
             document.getElementById('boomModal').style.display = 'flex';
+
+            // Start at specific time (seconds)
+            const startTime = 10; // <-- change this
+
+            if (audio.readyState >= 1) {
+                audio.currentTime = startTime;
+                audio.play();
+            } else {
+                audio.addEventListener('loadedmetadata', () => {
+                    audio.currentTime = startTime;
+                    audio.play();
+                }, { once: true });
+            }
         }
 
         function hideBoomer() {
             document.getElementById('boomModal').style.display = 'none';
+
+            // Stop and reset audio
+            audio.pause();
+            audio.currentTime = 0;
         }
     </script>
 
